@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
-@TeleOp(name = "long press shooter", group = "Main")
+@TeleOp(name = "toggle shooter", group = "Main")
 public class jan26 extends OpMode {
 
     // Drive motors
