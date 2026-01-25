@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 @TeleOp(name = "long press shooter", group = "Main")
-public class jan25 extends OpMode {
+public class jan26 extends OpMode {
 
     // Drive motors
     DcMotor fl, fr, bl, br;
@@ -19,6 +19,10 @@ public class jan25 extends OpMode {
     // Shooter toggle
     boolean shooterOn = false;
     boolean lastShooterBtn = false;
+
+    boolean intakeOn = false;
+    boolean lastIntakeBtn = false;
+
 
     static final double DEADZONE = 0.05;
 
@@ -88,30 +92,34 @@ public class jan25 extends OpMode {
         boolean reverse = gamepad1.left_bumper; // L1
         double dir = reverse ? -1.0 : 1.0;
 
-// ---- Intake ----
-        if (gamepad1.a) { // Cross
+// ---- Intake TOGGLE (Cross) ----
+        boolean intakeBtn = gamepad1.a; // Cross
+        if (intakeBtn && !lastIntakeBtn) {
+            intakeOn = !intakeOn;
+        }
+        lastIntakeBtn = intakeBtn;
+
+        if (intakeOn) {
             intakeLeft.setPower(1.0 * dir);
             intakeRight.setPower(1.0 * dir);
         } else {
             intakeLeft.setPower(0);
             intakeRight.setPower(0);
         }
-        if (!shooterOn && !reverse) transfer.setPower(0);
 
-// ---- Transfer ----
+// ---- Transfer HOLD (Square) ----
         if (gamepad1.x) { // Square
             transfer.setPower(1.0 * dir);
         } else {
             transfer.setPower(0);
         }
 
-// ---- Shooter toggle ----
+// ---- Shooter TOGGLE (R1) ----
         boolean shooterBtn = gamepad1.right_bumper; // R1
         if (shooterBtn && !lastShooterBtn)
             shooterOn = !shooterOn;
         lastShooterBtn = shooterBtn;
 
         shooter.setPower(shooterOn ? 1.0 : 0.0);
-
     }
 }
