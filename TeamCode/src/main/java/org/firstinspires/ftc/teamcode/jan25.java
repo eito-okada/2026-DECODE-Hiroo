@@ -5,18 +5,20 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
-@TeleOp(name = "Eito ver. Simple code", group = "Main")
+@TeleOp(name = "Simple Mecanum + Shooter", group = "Main")
 public class jan25 extends OpMode {
 
     // Drive motors
     DcMotor fl, fr, bl, br;
 
     // Mechanisms
-    DcMotor intake, arm, launcher1, launcher2;
+    DcMotor intakeLeft, intakeRight;
+    DcMotor transfer;
+    DcMotor shooter;
 
-    // Launcher toggle
-    boolean launcherOn = false;
-    boolean lastLauncherBtn = false;
+    // Shooter toggle
+    boolean shooterOn = false;
+    boolean lastShooterBtn = false;
 
     static final double DEADZONE = 0.05;
 
@@ -37,17 +39,17 @@ public class jan25 extends OpMode {
         bl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         br.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        // Mechanisms
-        intake = hardwareMap.get(DcMotor.class, "motor4");
-        arm = hardwareMap.get(DcMotor.class, "motor5");
-        launcher1 = hardwareMap.get(DcMotor.class, "motor6");
-        launcher2 = hardwareMap.get(DcMotor.class, "motor7");
+        // Mechanism motors
+        intakeLeft  = hardwareMap.get(DcMotor.class, "motor4");
+        intakeRight = hardwareMap.get(DcMotor.class, "motor5");
+        transfer    = hardwareMap.get(DcMotor.class, "motor6");
+        shooter     = hardwareMap.get(DcMotor.class, "motor7");
 
-        arm.setDirection(DcMotorSimple.Direction.REVERSE);
-        launcher2.setDirection(DcMotorSimple.Direction.REVERSE);
+        // Directions (CHANGE if your robot runs backwards)
+        intakeRight.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        launcher1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        launcher2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        // Shooter usually coasts
+        shooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
     }
 
     @Override
@@ -82,28 +84,31 @@ public class jan25 extends OpMode {
         // =========================
         // MECHANISMS
         // =========================
-        double dir = gamepad1.left_bumper ? -1.0 : 1.0;
 
-        // Intake
-        if (gamepad1.left_trigger > 0.5)
-            intake.setPower(1.0 * dir);
-        else
-            intake.setPower(0);
+        // Intake + Transfer (hold)
+        if (gamepad1.a) {
+            intakeLeft.setPower(1.0);
+            intakeRight.setPower(1.0);
+            transfer.setPower(1.0);
+        }
+        // Reverse Intake + Transfer (hold)
+        else if (gamepad1.b) {
+            intakeLeft.setPower(-1.0);
+            intakeRight.setPower(-1.0);
+            transfer.setPower(-1.0);
+        }
+        else {
+            intakeLeft.setPower(0);
+            intakeRight.setPower(0);
+            transfer.setPower(0);
+        }
 
-        // Arm
-        if (gamepad1.right_trigger > 0.5)
-            arm.setPower(1.0 * dir);
-        else
-            arm.setPower(0);
+        // Shooter toggle
+        boolean shooterBtn = gamepad1.right_bumper;
+        if (shooterBtn && !lastShooterBtn)
+            shooterOn = !shooterOn;
+        lastShooterBtn = shooterBtn;
 
-        // Launcher toggle
-        boolean launcherBtn = gamepad1.right_bumper;
-        if (launcherBtn && !lastLauncherBtn)
-            launcherOn = !launcherOn;
-        lastLauncherBtn = launcherBtn;
-
-        double launchPower = launcherOn ? 1.0 : 0.0;
-        launcher1.setPower(launchPower);
-        launcher2.setPower(launchPower);
+        shooter.setPower(shooterOn ? 1.0 : 0.0);
     }
 }
