@@ -47,6 +47,8 @@ public class jan25 extends OpMode {
 
         // Directions (CHANGE if your robot runs backwards)
         intakeRight.setDirection(DcMotorSimple.Direction.REVERSE);
+        shooter.setDirection(DcMotorSimple.Direction.REVERSE);
+        transfer.setDirection(DcMotorSimple.Direction.REVERSE);
 
         // Shooter usually coasts
         shooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
