@@ -9,11 +9,11 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 @TeleOp(name = "Flywheel Tuner", group = "Main")
 public class flywheeltuner extends OpMode {
-
+    DcMotor transfer;
     public DcMotorEx flywheelmotor;
 
-    public double highvelocity = 4500;
-    public double lowvelocity = 2000;
+    public double highvelocity = 1520;
+    public double lowvelocity = 900;
 
     double curTargetVelocity = highvelocity;
 
@@ -27,6 +27,7 @@ public class flywheeltuner extends OpMode {
 
     @Override
     public void init() {
+        transfer = hardwareMap.get(DcMotor.class, "motor6");
         flywheelmotor = hardwareMap.get(DcMotorEx.class, "motor7");
         flywheelmotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         flywheelmotor.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -65,7 +66,15 @@ public class flywheeltuner extends OpMode {
             P += stepSizes[stepIndex];
         }
 
+        if (gamepad1.x) { // Square
+            transfer.setPower(-1.0);
+        } else {
+            transfer.setPower(0);
+        }
+
         //set new PIDF coefficient
+        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(P, 0, 0, F);
+        flywheelmotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
         flywheelmotor.setVelocity(curTargetVelocity);
 
         double curVelocity = flywheelmotor.getVelocity();
@@ -76,8 +85,8 @@ public class flywheeltuner extends OpMode {
         telemetry.addData("Current Velocity:", "%.2f", curVelocity);
         telemetry.addData("Error","%.2f", error);
         telemetry.addLine("-------------------------------------");
-        telemetry.addData("Tuning P:", "&.4f (D-pad U/D)", P);
-        telemetry.addData("Tuning F:", "&.4f (D-pad L/R)", F);
-        telemetry.addData("Step Size:", "%.4f (B Button)", stepSizes[stepIndex]);
+        telemetry.addData("Tuning P (D-pad U/D):", "%.4f", P);
+        telemetry.addData("Tuning F (D-pad L/R):", "%.4f", F);
+        telemetry.addData("Step Size (B Button):", "%.4f", stepSizes[stepIndex]);
     }
 }
