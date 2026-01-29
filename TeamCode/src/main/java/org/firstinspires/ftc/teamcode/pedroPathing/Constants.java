@@ -27,26 +27,18 @@ public class Constants {
             .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD);
 
     public static TwoWheelConstants localizerConstants = new TwoWheelConstants()
-            // ★ "left" ではなく "forward" を使います
-            .forwardEncoderName("motor0")
+            .forwardEncoderDirection("motor0")   // ✅ this replaces parallelEncoderName
             .strafeEncoderName("motor3")
-
-            // ★ 方向設定 (DcMotorSimpleを使用)
             .forwardEncoderDirection(DcMotorSimple.Direction.FORWARD)
             .strafeEncoderDirection(DcMotorSimple.Direction.FORWARD)
-
-            // IMUの設定 (これはそのまま)
             .imuName("imu")
             .imuLogoDirection(RevHubOrientationOnRobot.LogoFacingDirection.UP)
             .imuUsbDirection(RevHubOrientationOnRobot.UsbFacingDirection.FORWARD)
-
-            // ★ "leftPodY" ではなく "forwardPodY" を使います
-            .forwardPodY(5.5)   // ロボット中心から縦向きポッドまでの距離（左ならプラス）
-            .strafePodX(-2.5)   // ロボット中心から横向きポッドまでの距離（前ならプラス）
-
-            // ★ "leftTicks..." ではなく "forwardTicks..." を使います
+            .forwardPodY(5.5)
+            .strafePodX(-2.5)
             .forwardTicksToInches(0.0005)
             .strafeTicksToInches(0.0005);
+
 
     public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1, 1);
 
