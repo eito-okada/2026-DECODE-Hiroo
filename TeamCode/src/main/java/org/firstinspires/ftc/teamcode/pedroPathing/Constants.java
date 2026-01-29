@@ -14,7 +14,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class Constants {
 
-    // FIX: Added .localizerType(LocalizerType.PINPOINT)
+    // FIX: Added .localizerType(LocalizerType.PINPOINT
     public static FollowerConstants followerConstants = new FollowerConstants()
             .mass(7);
 
