@@ -4,12 +4,13 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.follower.FollowerConstants;
 import com.pedropathing.ftc.FollowerBuilder;
 import com.pedropathing.ftc.drivetrains.MecanumConstants;
-import com.pedropathing.ftc.localization.constants.PinpointConstants;
+import com.pedropathing.ftc.localization.Encoder;
+import com.pedropathing.ftc.localization.constants.TwoWheelConstants;
 import com.pedropathing.paths.PathConstraints;
-import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
+
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class Constants {
 
@@ -27,38 +28,30 @@ public class Constants {
             .rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
             .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD);
 
-    // -------------------- Pinpoint tuning (INCH) --------------------
-    private static final DistanceUnit PINPOINT_UNIT = DistanceUnit.INCH;
-    private static final String PINPOINT_NAME = "pinpoint";
+    public static final TwoWheelConstants localizerConstants = new TwoWheelConstants()
+            .forwardEncoder_HardwareMapName("motor0")
+            .strafeEncoder_HardwareMapName("motor1")
 
-    // Robot中心からのオフセット(インチ) ※実機に合わせて調整
-    private static final double FORWARD_POD_Y_IN = -5.0;
-    private static final double STRAFE_POD_X_IN  =  0.5;
+            .IMU_HardwareMapName("imu")
+            .IMU_Orientation(new RevHubOrientationOnRobot(
+                    RevHubOrientationOnRobot.LogoFacingDirection.UP,
+                    RevHubOrientationOnRobot.UsbFacingDirection.LEFT
+            ))
 
-    // ここは実機で逆ならREVERSEに切替
-    private static final GoBildaPinpointDriver.EncoderDirection FORWARD_DIR =
-            GoBildaPinpointDriver.EncoderDirection.FORWARD;
-    private static final GoBildaPinpointDriver.EncoderDirection STRAFE_DIR  =
-            GoBildaPinpointDriver.EncoderDirection.FORWARD;
+            .forwardPodY(-5.0)
+            .strafePodX(0.5)
 
-    private static final GoBildaPinpointDriver.GoBildaOdometryPods POD_TYPE =
-            GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD;
+            .forwardTicksToInches(0.00296)
+            .strafeTicksToInches(0.00296)
 
-    public static final PinpointConstants localizerConstants = new PinpointConstants()
-            .distanceUnit(PINPOINT_UNIT)
-            .hardwareMapName(PINPOINT_NAME)
-            .forwardPodY(FORWARD_POD_Y_IN)
-            .strafePodX(STRAFE_POD_X_IN)
-            .encoderResolution(POD_TYPE)
-            .forwardEncoderDirection(FORWARD_DIR)
-            .strafeEncoderDirection(STRAFE_DIR);
+            .forwardEncoderDirection(Encoder.FORWARD)
+            .strafeEncoderDirection(Encoder.FORWARD);
 
-    // ここは今のままでOK（動作確認が先）
     public static final PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1, 1);
 
     public static Follower createFollower(HardwareMap hardwareMap) {
         return new FollowerBuilder(followerConstants, hardwareMap)
-                .pinpointLocalizer(localizerConstants)
+                .twoWheelLocalizer(localizerConstants)
                 .pathConstraints(pathConstraints)
                 .mecanumDrivetrain(driveConstants)
                 .build();
