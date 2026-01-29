@@ -23,6 +23,7 @@ public class jan26 extends OpMode {
     boolean intakeOn = false;
     boolean lastIntakeBtn = false;
 
+    boolean flMotorOk = true;
 
     static final double DEADZONE = 0.05;
 
@@ -35,7 +36,7 @@ public class jan26 extends OpMode {
         fr = hardwareMap.get(DcMotor.class, "motor2");
         br = hardwareMap.get(DcMotor.class, "motor3");
 
-        //fl.setDirection(DcMotorSimple.Direction.REVERSE); why泣
+        //fl.setDirection(DcMotorSimple.Direction.REVERSE);
         bl.setDirection(DcMotorSimple.Direction.REVERSE);
 
         fl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -112,6 +113,16 @@ public class jan26 extends OpMode {
             transfer.setPower(1.0 * dir);
         } else {
             transfer.setPower(0);
+        }
+
+        if(gamepad1.dpadUpWasPressed()) {
+            if (flMotorOk) {
+                fl.setDirection(DcMotorSimple.Direction.REVERSE);
+                flMotorOk = false;
+            } else {
+                fl.setDirection(DcMotorSimple.Direction.FORWARD);
+                flMotorOk = true;
+            }
         }
 
 // ---- Shooter TOGGLE (R1) ----
