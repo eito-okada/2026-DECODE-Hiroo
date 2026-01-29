@@ -7,7 +7,7 @@ import com.pedropathing.ftc.drivetrains.MecanumConstants;
 import com.pedropathing.ftc.localization.constants.TwoWheelConstants;
 import com.pedropathing.paths.PathConstraints;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
-import com.qualcomm.robotcore.hardware.DcMotorSimple; // ★ここを確認
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 public class Constants {
@@ -26,19 +26,32 @@ public class Constants {
             .rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
             .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD);
 
+    // Fixed TwoWheelConstants based on your provided method names
     public static TwoWheelConstants localizerConstants = new TwoWheelConstants()
-            .forwardEncoderDirection("motor0")   // ✅ this replaces parallelEncoderName
-            .strafeEncoderName("motor3")
-            .forwardEncoderDirection(DcMotorSimple.Direction.FORWARD)
-            .strafeEncoderDirection(DcMotorSimple.Direction.FORWARD)
-            .imuName("imu")
-            .imuLogoDirection(RevHubOrientationOnRobot.LogoFacingDirection.UP)
-            .imuUsbDirection(RevHubOrientationOnRobot.UsbFacingDirection.FORWARD)
-            .forwardPodY(5.5)
-            .strafePodX(-2.5)
+            // 1. Hardware Map Names (The ones you found)
+            .forwardEncoder_HardwareMapName("motor0")
+            .strafeEncoder_HardwareMapName("motor3")
+
+            // 2. Encoder Directions (DcMotorSimple.Direction)
+            // Run LocalizationTest: If X goes down when you push forward, flip REVERSE to FORWARD
+            .forwardEncoderDirection(1.0)
+            .strafeEncoderDirection(-1.0)
+
+            .IMU_HardwareMapName("imu")
+
+            // ★ これを試してください（2行を1行にまとめる）
+            .IMU_Orientation(new RevHubOrientationOnRobot(
+                    RevHubOrientationOnRobot.LogoFacingDirection.UP,
+                    RevHubOrientationOnRobot.UsbFacingDirection.FORWARD
+            ))
+
+            // 4. Physical Pod Offsets (インチ単位)
+            .forwardPodY(5.5)   // 左ならプラス
+            .strafePodX(-2.5)   // 前ならプラス
+
+            // 5. Tuning Values
             .forwardTicksToInches(0.0005)
             .strafeTicksToInches(0.0005);
-
 
     public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1, 1);
 
