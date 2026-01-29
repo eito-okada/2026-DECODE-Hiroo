@@ -27,7 +27,7 @@ public class flywheeltuner extends OpMode {
 
     @Override
     public void init() {
-        flywheelmotor = hardwareMap.get(DcMotorEx.class, "motor");
+        flywheelmotor = hardwareMap.get(DcMotorEx.class, "motor7");
         flywheelmotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         flywheelmotor.setDirection(DcMotorSimple.Direction.REVERSE);
         PIDFCoefficients pidfCoefficients = new PIDFCoefficients(P, 0, 0, F);
