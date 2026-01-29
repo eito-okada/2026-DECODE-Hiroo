@@ -44,7 +44,6 @@ public class Constants {
     public static Follower createFollower(HardwareMap hardwareMap) {
         return new FollowerBuilder(followerConstants, hardwareMap)
                 .pinpointLocalizer(localizerConstants)
-                // .leftOdo(new TwoWheelConstants(...)) // Sometimes adding dummy odometry helpers stops the crash on old versions
                 .pathConstraints(pathConstraints)
                 .mecanumDrivetrain(driveConstants)
                 .build();
