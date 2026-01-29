@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
-@TeleOp(name = "Mecanum + Manual (No Anchor)", group = "Main")
+@TeleOp(name = "Mecanum + Speed Control", group = "Main")
 public class main_gen1 extends OpMode {
 
     // --- ODOMETRY VARIABLES (位置表示用) ---
@@ -32,13 +32,16 @@ public class main_gen1 extends OpMode {
     private boolean launcherActive = false;
     private boolean lastLauncherBtn = false;
 
-    // --- SETTINGS ---
+    // --- SETTINGS (ここを調整してください) ---
     private static final double DEADZONE = 0.05;
+
+    // スピード設定
+    private static final double SPEED_NORMAL = 1.0; // 通常時の速度 (0.0 ~ 1.0)
+    private static final double SPEED_SLOW = 0.7;   // 低速モード時の速度 (0.0 ~ 1.0)
+
+    // メカニズム出力
     private static final double POWER_INTAKE = 1.0;
-
-    // アーム出力 MAX
     private static final double POWER_ARM = 1.0;
-
     private static final double POWER_LAUNCH = 1.0;
     private static final double TRIGGER_THRESHOLD = 0.5;
 
@@ -56,7 +59,7 @@ public class main_gen1 extends OpMode {
         try {
             fl = hardwareMap.get(DcMotor.class, "motor0");
             fl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            fl.setDirection(DcMotorSimple.Direction.REVERSE);
+            //fl.setDirection(DcMotorSimple.Direction.REVERSE);
             fl.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             flOk = true;
         } catch (Exception e) {}
@@ -97,7 +100,7 @@ public class main_gen1 extends OpMode {
     @Override
     public void loop() {
         // ============================================
-        // 1. ODOMETRY UPDATE (座標計算のみ実施・制御には使いません)
+        // 1. ODOMETRY UPDATE
         // ============================================
         int currentParPos = flOk ? fl.getCurrentPosition() : 0;
         int currentPerpPos = blOk ? bl.getCurrentPosition() : 0;
@@ -115,7 +118,7 @@ public class main_gen1 extends OpMode {
         globalY += deltaY / TICKS_PER_UNIT;
 
         // ============================================
-        // 2. DRIVE LOGIC (完全マニュアル操作)
+        // 2. DRIVE LOGIC (スピード調整機能付き)
         // ============================================
 
         double yInput = -gamepad1.left_stick_y; // 前後
@@ -127,19 +130,24 @@ public class main_gen1 extends OpMode {
         if (Math.abs(xInput) < DEADZONE) xInput = 0;
         if (Math.abs(rInput) < DEADZONE) rInput = 0;
 
+        // --- スピード制御ロジック ---
+        // Aボタンを押している間は低速(SLOW)、離すと通常(NORMAL)
+        double speedMultiplier = gamepad1.a ? SPEED_SLOW : SPEED_NORMAL;
+
         // メカナムホイール出力計算
         double flPow = yInput + xInput + rInput;
         double frPow = yInput - xInput - rInput;
         double blPow = yInput - xInput + rInput;
         double brPow = yInput + xInput - rInput;
 
-        // パワーの正規化 (最大値が1を超えないようにする)
+        // パワーの正規化 (比率を保ったまま最大値を1に抑える)
         double max = Math.max(1.0, Math.max(Math.abs(flPow), Math.max(Math.abs(frPow), Math.max(Math.abs(blPow), Math.abs(brPow)))));
 
-        if (flOk) fl.setPower(flPow / max);
-        if (frOk) fr.setPower(frPow / max);
-        if (blOk) bl.setPower(blPow / max);
-        if (brOk) br.setPower(brPow / max);
+        // 最終出力計算 (正規化後の値 × スピード倍率)
+        if (flOk) fl.setPower((flPow / max) * speedMultiplier);
+        if (frOk) fr.setPower((frPow / max) * speedMultiplier);
+        if (blOk) bl.setPower((blPow / max) * speedMultiplier);
+        if (brOk) br.setPower((brPow / max) * speedMultiplier);
 
 
         // ============================================
@@ -155,7 +163,7 @@ public class main_gen1 extends OpMode {
             else intake.setPower(0);
         }
 
-        // Arm (Extension) - MAX Power
+        // Arm (Extension)
         if (armOk) {
             if (gamepad1.right_trigger > TRIGGER_THRESHOLD) arm.setPower(POWER_ARM * dirMultiplier);
             else arm.setPower(0);
@@ -171,7 +179,8 @@ public class main_gen1 extends OpMode {
         if (launcher2Ok) launcher2.setPower(launchPower);
 
         // --- Telemetry ---
-        telemetry.addData("Mode", "Manual Drive (No Anchor)");
+        telemetry.addData("Mode", "Manual Drive");
+        telemetry.addData("Speed", gamepad1.a ? "SLOW (30%)" : "NORMAL (100%)"); // 現在の速度を表示
         telemetry.addData("Arm Power", "%.1f", armOk ? arm.getPower() : 0);
         telemetry.addData("Launcher", launcherActive ? "ON" : "OFF");
         telemetry.addData("Position", "X:%.1f, Y:%.1f", globalX, globalY);
