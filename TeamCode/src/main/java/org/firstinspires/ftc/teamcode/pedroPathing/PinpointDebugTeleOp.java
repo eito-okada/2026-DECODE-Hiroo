@@ -44,19 +44,34 @@ public class PinpointDebugTeleOp extends OpMode {
 
     @Override
     public void loop() {
-        // ★これが無いとPoseが更新されないことが多い
+        // 1. Update Pedro Pathing
         follower.update();
 
-        // Pose表示（PedroPathing側が更新している値）
+        // 2. FORCE update the raw Pinpoint driver to check hardware directly
+        if (pinpointOk) {
+            pinpoint.update(); // This ensures we get fresh data from the device
+
+            // Check if the device is actually ready
+            telemetry.addData("Device Status", pinpoint.getDeviceStatus());
+
+            // Check raw encoder positions (if these stay 0, your pods are unplugged)
+            // Get the raw position object first
+            org.firstinspires.ftc.robotcore.external.navigation.Pose2D rawPose = pinpoint.getPosition();
+
+// Now get X and Y from that object, specifying the unit (INCH)
+            telemetry.addData("Raw X (in)", rawPose.getX(org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.INCH));
+            telemetry.addData("Raw Y (in)", rawPose.getY(org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.INCH));
+        }
+
+        // 3. Get Pedro's interpreted Pose
         com.pedropathing.geometry.Pose pose = follower.getPose();
 
+        telemetry.addData("--- Pedro Pose ---", "");
         telemetry.addData("x", pose.getX());
         telemetry.addData("y", pose.getY());
         telemetry.addData("heading", pose.getHeading());
 
-        // Pinpointが見つかっているかも常に出す（0固定ならまずここを疑う）
         telemetry.addData("pinpointOk", pinpointOk);
-
         telemetry.update();
     }
 }
