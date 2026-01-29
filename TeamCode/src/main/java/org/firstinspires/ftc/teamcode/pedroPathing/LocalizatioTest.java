@@ -25,19 +25,23 @@ public class LocalizatioTest extends OpMode {
 
     @Override
     public void loop() {
-        if (follower != null) {
-            follower.update();
+        follower.update();
 
-            com.pedropathing.geometry.Pose pose = follower.getPose();
+        // Get the pose (Position + Heading)
+        com.pedropathing.geometry.Pose pose = follower.getPose();
 
-            telemetry.addData("X (Inches)", pose.getX());
-            telemetry.addData("Y (Inches)", pose.getY());
-            telemetry.addData("Heading (Deg)", Math.toDegrees(pose.getHeading()));
+        // X and Y are in Inches
+        telemetry.addData("X (Inches)", pose.getX());
+        telemetry.addData("Y (Inches)", pose.getY());
 
-            telemetry.addLine("\n--- Raw Encoders ---");
+        // Heading is in Radians -> Convert to Degrees for humans
+        double headingRadians = pose.getHeading();
+        double headingDegrees = Math.toDegrees(headingRadians);
 
-        }
+        telemetry.addData("Heading (Radians)", "%.2f", headingRadians); // Shows 3.14
+        telemetry.addData("Heading (Degrees)", "%.1f", headingDegrees); // Shows 180.0
 
         telemetry.update();
     }
+
 }
