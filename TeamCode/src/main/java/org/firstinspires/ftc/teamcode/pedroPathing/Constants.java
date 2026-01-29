@@ -13,10 +13,10 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class Constants {
 
-    public static FollowerConstants followerConstants = new FollowerConstants()
+    public static final FollowerConstants followerConstants = new FollowerConstants()
             .mass(7);
 
-    public static MecanumConstants driveConstants = new MecanumConstants()
+    public static final MecanumConstants driveConstants = new MecanumConstants()
             .maxPower(1)
             .rightFrontMotorName("motor0")
             .rightRearMotorName("motor1")
@@ -27,12 +27,15 @@ public class Constants {
             .rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
             .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD);
 
+    // -------------------- Pinpoint tuning (INCH) --------------------
     private static final DistanceUnit PINPOINT_UNIT = DistanceUnit.INCH;
     private static final String PINPOINT_NAME = "pinpoint";
 
+    // Robot中心からのオフセット(インチ) ※実機に合わせて調整
     private static final double FORWARD_POD_Y_IN = -5.0;
     private static final double STRAFE_POD_X_IN  =  0.5;
 
+    // ここは実機で逆ならREVERSEに切替
     private static final GoBildaPinpointDriver.EncoderDirection FORWARD_DIR =
             GoBildaPinpointDriver.EncoderDirection.FORWARD;
     private static final GoBildaPinpointDriver.EncoderDirection STRAFE_DIR  =
@@ -50,8 +53,8 @@ public class Constants {
             .forwardEncoderDirection(FORWARD_DIR)
             .strafeEncoderDirection(STRAFE_DIR);
 
-
-    public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1, 1);
+    // ここは今のままでOK（動作確認が先）
+    public static final PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1, 1);
 
     public static Follower createFollower(HardwareMap hardwareMap) {
         return new FollowerBuilder(followerConstants, hardwareMap)
