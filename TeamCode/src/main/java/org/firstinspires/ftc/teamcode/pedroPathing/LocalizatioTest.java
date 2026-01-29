@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 @TeleOp(name = "Localization Test (No Pinpoint)", group = "Debug")
-public class LocalizationTest extends OpMode {
+public class LocalizatioTest extends OpMode {
 
     private Follower follower;
 
