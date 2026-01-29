@@ -34,8 +34,8 @@ public class Constants {
 
             .IMU_HardwareMapName("imu")
             .IMU_Orientation(new RevHubOrientationOnRobot(
-                    RevHubOrientationOnRobot.LogoFacingDirection.UP,
-                    RevHubOrientationOnRobot.UsbFacingDirection.LEFT
+                    RevHubOrientationOnRobot.LogoFacingDirection.DOWN,
+                    RevHubOrientationOnRobot.UsbFacingDirection.FORWARD
             ))
 
             .forwardPodY(-5.0)
