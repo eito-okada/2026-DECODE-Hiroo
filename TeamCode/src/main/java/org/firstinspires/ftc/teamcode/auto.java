@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import java.util.ArrayList;
 import java.util.List;
 
-@Autonomous(name = "Totally auto", group = "Main")
+@Autonomous(name = "totally auto V2", group = "Main")
 public class auto extends LinearOpMode {
 
     private DcMotor fl, fr, bl, br;
@@ -22,17 +22,21 @@ public class auto extends LinearOpMode {
         ActionType type;
         double power;
         double seconds;
+        double delay;
 
-        public AutoStep(ActionType t, double p, double s) {
+        public AutoStep(ActionType t, double p, double s, double d) {
             this.type = t;
             this.power = p;
             this.seconds = s;
+            this.delay = d;
         }
 
         @NonNull
         @Override
         public String toString() {
-            if (type == ActionType.SHOOT) return "SHOOT";
+            if (type == ActionType.SHOOT) {
+                return String.format("SHOOT %.0f%% (Wait %.1fs, Run %.1fs)", power * 100, delay, seconds);
+            }
             return String.format("%s (%.0f%%) for %.1fs", type, power * 100, seconds);
         }
     }
@@ -63,6 +67,7 @@ public class auto extends LinearOpMode {
         ActionType curType = ActionType.FORWARD;
         double curPower = 0.5;
         double curTime = 1.0;
+        double curDelay = 1.0;
 
         boolean lastUp = false, lastDown = false, lastLeft = false, lastRight = false;
         boolean lastA = false, lastB = false;
@@ -73,8 +78,8 @@ public class auto extends LinearOpMode {
 
             if (gamepad1.dpad_up && !lastUp) selectedRow--;
             if (gamepad1.dpad_down && !lastDown) selectedRow++;
-            if (selectedRow < 0) selectedRow = 2;
-            if (selectedRow > 2) selectedRow = 0;
+            if (selectedRow < 0) selectedRow = 3;
+            if (selectedRow > 3) selectedRow = 0;
 
             if (gamepad1.dpad_right && !lastRight) {
                 if (selectedRow == 0) {
@@ -83,8 +88,10 @@ public class auto extends LinearOpMode {
                 } else if (selectedRow == 1) {
                     curPower += 0.1;
                     if (curPower > 1.0) curPower = 1.0;
-                } else {
+                } else if (selectedRow == 2) {
                     curTime += 0.1;
+                } else {
+                    curDelay += 0.1;
                 }
             }
 
@@ -96,14 +103,17 @@ public class auto extends LinearOpMode {
                 } else if (selectedRow == 1) {
                     curPower -= 0.1;
                     if (curPower < 0.1) curPower = 0.1;
-                } else {
+                } else if (selectedRow == 2) {
                     curTime -= 0.1;
                     if (curTime < 0.1) curTime = 0.1;
+                } else {
+                    curDelay -= 0.1;
+                    if (curDelay < 0.0) curDelay = 0.0;
                 }
             }
 
             if (gamepad1.a && !lastA) {
-                program.add(new AutoStep(curType, curPower, curTime));
+                program.add(new AutoStep(curType, curPower, curTime, curDelay));
             }
 
             if (gamepad1.b && !lastB) {
@@ -120,12 +130,13 @@ public class auto extends LinearOpMode {
             lastB = gamepad1.b;
 
             telemetry.addLine("=== CREATOR MODE ===");
-            telemetry.addLine("DPAD: Move/Change | A: Add | B: Delete");
+            telemetry.addLine("DPAD: Change | A: Add | B: Delete");
             telemetry.addLine();
 
             telemetry.addData(selectedRow == 0 ? "-> ACTION" : "   ACTION", curType);
             telemetry.addData(selectedRow == 1 ? "-> POWER " : "   POWER ", "%.0f%%", curPower * 100);
             telemetry.addData(selectedRow == 2 ? "-> TIME  " : "   TIME  ", "%.1fs", curTime);
+            telemetry.addData(selectedRow == 3 ? "-> DELAY " : "   DELAY ", "%.1fs (Shoot Only)", curDelay);
 
             telemetry.addLine();
             telemetry.addLine("--- CURRENT PROGRAM ---");
@@ -148,10 +159,12 @@ public class auto extends LinearOpMode {
 
     private void execute(AutoStep step) {
         if (step.type == ActionType.SHOOT) {
-            shooter.setPower(1.0);
-            sleep(1500);
-            transfer.setPower(1.0);
-            sleep(1500);
+            shooter.setPower(step.power);
+            sleep((long)(step.delay * 1000));
+
+            transfer.setPower(step.power);
+            sleep((long)(step.seconds * 1000));
+
             shooter.setPower(0);
             transfer.setPower(0);
         } else {
