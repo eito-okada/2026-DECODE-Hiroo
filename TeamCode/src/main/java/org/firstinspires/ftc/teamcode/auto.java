@@ -166,6 +166,8 @@ public class auto extends LinearOpMode {
                     program.add(new AutoStep(ActionType.BACKWARD, 0.3, 3.5, false));
                     // 2. Gecko 100% 2s Forward
                     program.add(new AutoStep(ActionType.GECKO, 1.0, 2.0, false));
+                    // 2.5: new 1 sec forward intake
+                    program.add(new AutoStep(ActionType.INTAKE, 1.0, 1, false));
                     // 3. Intake 100% 0.3s Reverse (-1.0 Power)
                     program.add(new AutoStep(ActionType.INTAKE, -1.0, 0.3, false));
                     // 4. Intake 100% 5s Forward JOIN=ON
