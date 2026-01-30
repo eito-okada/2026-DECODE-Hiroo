@@ -15,35 +15,40 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import java.util.ArrayList;
 import java.util.List;
 
-@Autonomous(name = "誰が何を言おうと自動です V9", group = "Main")
+@Autonomous(name = "もはや手動ですが、自動です。「自動です」V10", group = "Main")
 public class auto extends LinearOpMode {
 
     private DcMotor fl, fr, bl, br;
-    private DcMotor gecko, intake;
+    private DcMotor transferMotor, intake;
     private IMU imu;
 
-    private enum ActionType { FORWARD, BACKWARD, LEFT, RIGHT, TURN_LEFT, TURN_RIGHT, TRANSFER }
+    private enum ActionType {
+        FORWARD, BACKWARD, LEFT, RIGHT, TURN_LEFT, TURN_RIGHT,
+        TRANSFER, INTAKE
+    }
 
     private static class AutoStep {
         ActionType type;
         double power;
         double value;
+        boolean joinNext;
 
-        public AutoStep(ActionType t, double p, double v) {
+        public AutoStep(ActionType t, double p, double v, boolean j) {
             this.type = t;
             this.power = p;
             this.value = v;
+            this.joinNext = j;
         }
 
         @NonNull
         @Override
         public String toString() {
-            if (type == ActionType.TRANSFER) {
-                return String.format("TRANSFER (Feed %.0f%%) for %.1fs", power * 100, value);
-            } else if (type == ActionType.TURN_LEFT || type == ActionType.TURN_RIGHT) {
-                return String.format("%s (%.0f%%) for %.0f deg", type, power * 100, value);
+            String joinStr = joinNext ? " [+ JOIN]" : "";
+
+            if (type == ActionType.TURN_LEFT || type == ActionType.TURN_RIGHT) {
+                return String.format("%s (%.0f%%) %.0f deg%s", type, power * 100, value, joinStr);
             }
-            return String.format("%s (%.0f%%) for %.1fs", type, power * 100, value);
+            return String.format("%s (%.0f%%) %.1fs%s", type, power * 100, value, joinStr);
         }
     }
 
@@ -58,7 +63,7 @@ public class auto extends LinearOpMode {
         br = hardwareMap.get(DcMotor.class, "motor3");
 
         intake = hardwareMap.get(DcMotor.class, "motor4");
-        gecko = hardwareMap.get(DcMotor.class, "motor6");
+        transferMotor = hardwareMap.get(DcMotor.class, "motor6");
         DcMotorEx shooter = hardwareMap.get(DcMotorEx.class, "motor7");
 
         imu = hardwareMap.get(IMU.class, "imu");
@@ -73,7 +78,7 @@ public class auto extends LinearOpMode {
         br.setDirection(DcMotorSimple.Direction.FORWARD);
 
         shooter.setDirection(DcMotorSimple.Direction.FORWARD);
-        gecko.setDirection(DcMotorSimple.Direction.FORWARD);
+        transferMotor.setDirection(DcMotorSimple.Direction.FORWARD);
         intake.setDirection(DcMotorSimple.Direction.FORWARD);
 
         fl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -81,12 +86,14 @@ public class auto extends LinearOpMode {
         bl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         br.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         shooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        gecko.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        transferMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
         int selectedRow = 0;
         ActionType curType = ActionType.FORWARD;
         double curPower = 0.5;
         double curValue = 1.0;
+        boolean curJoin = false;
         double globalShooterPower = 0.6;
 
         boolean lastUp = false, lastDown = false, lastLeft = false, lastRight = false;
@@ -98,8 +105,8 @@ public class auto extends LinearOpMode {
 
             if (gamepad1.dpad_up && !lastUp) selectedRow--;
             if (gamepad1.dpad_down && !lastDown) selectedRow++;
-            if (selectedRow < 0) selectedRow = 3;
-            if (selectedRow > 3) selectedRow = 0;
+            if (selectedRow < 0) selectedRow = 4;
+            if (selectedRow > 4) selectedRow = 0;
 
             if (gamepad1.dpad_right && !lastRight) {
                 if (selectedRow == 0) {
@@ -117,6 +124,8 @@ public class auto extends LinearOpMode {
                     } else {
                         curValue += 0.1;
                     }
+                } else if (selectedRow == 3) {
+                    curJoin = !curJoin;
                 } else {
                     globalShooterPower = Math.min(1.0, globalShooterPower + 0.1);
                 }
@@ -128,19 +137,21 @@ public class auto extends LinearOpMode {
                     if (prev < 0) prev = types.length - 1;
                     curType = types[prev];
                 } else if (selectedRow == 1) {
-                    curPower = Math.max(0.1, curPower - 0.1);
+                    curPower = Math.max(-1.0, curPower - 0.1);
                 } else if (selectedRow == 2) {
                     if (curType == ActionType.TURN_LEFT || curType == ActionType.TURN_RIGHT) {
                         curValue = Math.max(5, curValue - 5);
                     } else {
                         curValue = Math.max(0.1, curValue - 0.1);
                     }
+                } else if (selectedRow == 3) {
+                    curJoin = !curJoin;
                 } else {
                     globalShooterPower = Math.max(0.0, globalShooterPower - 0.1);
                 }
             }
 
-            if (gamepad1.a && !lastA) program.add(new AutoStep(curType, curPower, curValue));
+            if (gamepad1.a && !lastA) program.add(new AutoStep(curType, curPower, curValue, curJoin));
             if (gamepad1.b && !lastB && !program.isEmpty()) program.remove(program.size() - 1);
 
             if (gamepad1.x && !lastX) {
@@ -159,9 +170,9 @@ public class auto extends LinearOpMode {
             lastB = gamepad1.b;
             lastX = gamepad1.x;
 
-            telemetry.addLine("=== CREATOR V9 ===");
+            telemetry.addLine("=== CREATOR V11 ===");
             telemetry.addLine("DPAD: Edit | A: Add | B: Delete");
-            telemetry.addLine("X: Toggle FL Direction");
+            telemetry.addLine("X: Toggle FL Dir | NEG Power = Reverse");
             telemetry.addLine();
 
             telemetry.addData(selectedRow == 0 ? "-> ACTION" : "   ACTION", curType);
@@ -173,8 +184,10 @@ public class auto extends LinearOpMode {
                 telemetry.addData(selectedRow == 2 ? "-> TIME  " : "   TIME  ", "%.1fs", curValue);
             }
 
+            telemetry.addData(selectedRow == 3 ? "-> JOIN  " : "   JOIN  ", curJoin ? "YES (Run w/ Next)" : "NO (Wait here)");
+
             telemetry.addLine();
-            telemetry.addData(selectedRow == 3 ? "-> FLYWL " : "   FLYWL ", "%.0f%%", globalShooterPower * 100);
+            telemetry.addData(selectedRow == 4 ? "-> FLYWL " : "   FLYWL ", "%.0f%%", globalShooterPower * 100);
 
             telemetry.addLine("-----------------------------");
             telemetry.addData("FL Motor Dir", fl.getDirection());
@@ -190,61 +203,83 @@ public class auto extends LinearOpMode {
         if (opModeIsActive()) {
             shooter.setPower(globalShooterPower);
 
-            for (AutoStep step : program) {
+            for (int i = 0; i < program.size(); i++) {
                 if (!opModeIsActive()) break;
-                telemetry.addData("Running", step.toString());
+
+                AutoStep step = program.get(i);
+                telemetry.addData("Running Step", i + 1);
+                telemetry.addData("Action", step.toString());
                 telemetry.update();
-                execute(step);
-                sleep(200);
-            }
 
+                startAction(step);
+
+                if (step.joinNext) {
+                    if (step.type == ActionType.TURN_LEFT || step.type == ActionType.TURN_RIGHT) {
+                        waitForGyro(step.type == ActionType.TURN_LEFT ? step.value : -step.value, step.power);
+                        stopAllMotors();
+                    }
+                } else {
+                    if (step.type == ActionType.TURN_LEFT || step.type == ActionType.TURN_RIGHT) {
+                        waitForGyro(step.type == ActionType.TURN_LEFT ? step.value : -step.value, step.power);
+                    } else {
+                        sleep((long) (step.value * 1000));
+                    }
+                    stopAllMotors();
+                }
+            }
             shooter.setPower(0);
+            stopAllMotors();
         }
     }
 
-    private void execute(AutoStep step) {
-        if (step.type == ActionType.TRANSFER) {
-            gecko.setPower(step.power);
-            intake.setPower(step.power);
-            sleep((long) (step.value * 1000));
-            gecko.setPower(0);
-            intake.setPower(0);
-        } else if (step.type == ActionType.TURN_LEFT || step.type == ActionType.TURN_RIGHT) {
-            turnToAngle(step.type == ActionType.TURN_LEFT ? step.value : -step.value, step.power);
-        } else {
-            double y = 0, x = 0;
-            double p = step.power;
+    private void startAction(AutoStep step) {
+        double p = step.power;
 
-            switch (step.type) {
-                case FORWARD: y = p; break;
-                case BACKWARD: y = -p; break;
-                case LEFT: x = -p; break;
-                case RIGHT: x = p; break;
-            }
+        switch (step.type) {
+            case FORWARD:
+                driveMecanum(p, 0, 0);
+                break;
+            case BACKWARD:
+                driveMecanum(-p, 0, 0);
+                break;
+            case LEFT:
+                driveMecanum(0, -p, 0);
+                break;
+            case RIGHT:
+                driveMecanum(0, p, 0);
+                break;
 
-            driveMecanum(y, x, 0);
-            sleep((long) (step.value * 1000));
-            driveMecanum(0, 0, 0);
+            case INTAKE:
+                intake.setPower(p);
+                break;
+            case TRANSFER:
+                transferMotor.setPower(p);
+                break;
+
+            case TURN_LEFT:
+            case TURN_RIGHT:
+                break;
         }
     }
 
-    private void turnToAngle(double targetAngleDeg, double power) {
+    private void stopAllMotors() {
+        fl.setPower(0);
+        fr.setPower(0);
+        bl.setPower(0);
+        br.setPower(0);
+        transferMotor.setPower(0);
+        intake.setPower(0);
+    }
+
+    private void waitForGyro(double targetAngleDeg, double power) {
         imu.resetYaw();
-
         while (opModeIsActive()) {
             double currentAngle = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
             double error = targetAngleDeg - currentAngle;
-
             if (Math.abs(error) < 2.0) break;
-
             double turnPower = Math.abs(power) * Math.signum(error);
             if (Math.abs(turnPower) < 0.15) turnPower = 0.15 * Math.signum(error);
-
             driveMecanum(0, 0, -turnPower);
-
-            telemetry.addData("Target", "%.1f", targetAngleDeg);
-            telemetry.addData("Current", "%.1f", currentAngle);
-            telemetry.update();
         }
         driveMecanum(0, 0, 0);
     }
@@ -254,7 +289,6 @@ public class auto extends LinearOpMode {
         double blP = y - x + rx;
         double frP = y - x - rx;
         double brP = y + x - rx;
-
         double max = Math.max(Math.abs(flP), Math.max(Math.abs(blP), Math.max(Math.abs(frP), Math.abs(brP))));
         if (max > 1.0) {
             flP /= max;
@@ -262,7 +296,6 @@ public class auto extends LinearOpMode {
             frP /= max;
             brP /= max;
         }
-
         fl.setPower(flP);
         bl.setPower(blP);
         fr.setPower(frP);
