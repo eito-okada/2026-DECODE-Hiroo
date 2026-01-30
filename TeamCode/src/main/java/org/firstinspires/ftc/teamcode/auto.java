@@ -80,14 +80,25 @@ public class auto extends LinearOpMode {
                 RevHubOrientationOnRobot.UsbFacingDirection.FORWARD));
         imu.initialize(parameters);
 
+<<<<<<< Updated upstream
         fl.setDirection(DcMotorSimple.Direction.REVERSE);
+=======
+        // --- DRIVE DIRECTIONS (Standard Mecanum) ---
+        fl.setDirection(DcMotorSimple.Direction.FORWARD);
+>>>>>>> Stashed changes
         bl.setDirection(DcMotorSimple.Direction.REVERSE);
         fr.setDirection(DcMotorSimple.Direction.FORWARD);
         br.setDirection(DcMotorSimple.Direction.FORWARD);
 
+<<<<<<< Updated upstream
         shooter.setDirection(DcMotorSimple.Direction.FORWARD);
+=======
+
+        shooter.setDirection(DcMotorSimple.Direction.REVERSE);
+>>>>>>> Stashed changes
         gecko.setDirection(DcMotorSimple.Direction.REVERSE);
-        intake.setDirection(DcMotorSimple.Direction.REVERSE);
+
+
 
         fl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         fr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -103,9 +114,13 @@ public class auto extends LinearOpMode {
         double curValue = 1.0;
         boolean curJoin = false;
         boolean curReverse = false;
+<<<<<<< Updated upstream
 
         double globalShooterPower = 0.6;
         boolean globalShooterReverse = false;
+=======
+        double globalShooterPower = 0.7;
+>>>>>>> Stashed changes
 
         boolean lastUp = false, lastDown = false, lastLeft = false, lastRight = false;
         boolean lastA = false, lastB = false;
@@ -222,12 +237,17 @@ public class auto extends LinearOpMode {
 
         if (opModeIsActive()) {
 
+<<<<<<< Updated upstream
             if (globalShooterReverse) {
                 shooter.setDirection(DcMotorSimple.Direction.REVERSE);
             } else {
                 shooter.setDirection(DcMotorSimple.Direction.FORWARD);
             }
             shooter.setPower(globalShooterPower);
+=======
+            shooter.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, pidfCoefficients);
+            shooter.setVelocity(1520);
+>>>>>>> Stashed changes
 
             for (int i = 0; i < program.size(); i++) {
                 if (!opModeIsActive()) break;
