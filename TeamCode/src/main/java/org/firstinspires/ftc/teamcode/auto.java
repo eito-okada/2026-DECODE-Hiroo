@@ -15,7 +15,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import java.util.ArrayList;
 import java.util.List;
 
-@Autonomous(name = "ほい V13", group = "Main")
+@Autonomous(name = "Totally Auto V15", group = "Main")
 public class auto extends LinearOpMode {
 
     private DcMotor fl, fr, bl, br;
@@ -74,16 +74,12 @@ public class auto extends LinearOpMode {
                 RevHubOrientationOnRobot.UsbFacingDirection.FORWARD));
         imu.initialize(parameters);
 
-        // --- DRIVE DIRECTIONS (Standard Mecanum) ---
         fl.setDirection(DcMotorSimple.Direction.REVERSE);
         bl.setDirection(DcMotorSimple.Direction.REVERSE);
         fr.setDirection(DcMotorSimple.Direction.FORWARD);
         br.setDirection(DcMotorSimple.Direction.FORWARD);
 
-        // --- MECHANISM DIRECTIONS (FIXED HERE) ---
         shooter.setDirection(DcMotorSimple.Direction.FORWARD);
-
-        // Changed these to REVERSE so they pull IN/UP by default
         gecko.setDirection(DcMotorSimple.Direction.REVERSE);
         intake.setDirection(DcMotorSimple.Direction.REVERSE);
 
@@ -101,7 +97,9 @@ public class auto extends LinearOpMode {
         double curValue = 1.0;
         boolean curJoin = false;
         boolean curReverse = false;
+
         double globalShooterPower = 0.6;
+        boolean globalShooterReverse = false; // New Setting
 
         boolean lastUp = false, lastDown = false, lastLeft = false, lastRight = false;
         boolean lastA = false, lastB = false;
@@ -110,10 +108,11 @@ public class auto extends LinearOpMode {
 
         while (!isStarted() && !isStopRequested()) {
 
+            // Rows: 0=Action, 1=Power, 2=Dir, 3=Time/Deg, 4=Join, 5=Flywl Speed, 6=Flywl Dir
             if (gamepad1.dpad_up && !lastUp) selectedRow--;
             if (gamepad1.dpad_down && !lastDown) selectedRow++;
-            if (selectedRow < 0) selectedRow = 5;
-            if (selectedRow > 5) selectedRow = 0;
+            if (selectedRow < 0) selectedRow = 6;
+            if (selectedRow > 6) selectedRow = 0;
 
             if (gamepad1.dpad_right && !lastRight) {
                 if (selectedRow == 0) {
@@ -131,7 +130,8 @@ public class auto extends LinearOpMode {
                     else curValue += 0.1;
                 }
                 else if (selectedRow == 4) curJoin = !curJoin;
-                else globalShooterPower = Math.min(1.0, globalShooterPower + 0.1);
+                else if (selectedRow == 5) globalShooterPower = Math.min(1.0, globalShooterPower + 0.1);
+                else globalShooterReverse = !globalShooterReverse;
             }
 
             if (gamepad1.dpad_left && !lastLeft) {
@@ -147,7 +147,8 @@ public class auto extends LinearOpMode {
                     else curValue = Math.max(0.1, curValue - 0.1);
                 }
                 else if (selectedRow == 4) curJoin = !curJoin;
-                else globalShooterPower = Math.max(0.0, globalShooterPower - 0.1);
+                else if (selectedRow == 5) globalShooterPower = Math.max(0.0, globalShooterPower - 0.1);
+                else globalShooterReverse = !globalShooterReverse;
             }
 
             if (gamepad1.a && !lastA) {
@@ -160,7 +161,7 @@ public class auto extends LinearOpMode {
             lastLeft = gamepad1.dpad_left; lastRight = gamepad1.dpad_right;
             lastA = gamepad1.a; lastB = gamepad1.b;
 
-            telemetry.addLine("=== CREATOR V14 (REV FIX) ===");
+            telemetry.addLine("=== CREATOR V15 ===");
             telemetry.addLine("DPAD: Edit | A: Add | B: Delete");
             telemetry.addLine();
 
@@ -177,11 +178,10 @@ public class auto extends LinearOpMode {
             telemetry.addData(selectedRow == 4 ? "-> JOIN  " : "   JOIN  ", curJoin ? "YES (Run w/ Next)" : "NO");
 
             telemetry.addLine();
-            telemetry.addData(selectedRow == 5 ? "-> FLYWL " : "   FLYWL ", "%.0f%%", globalShooterPower * 100);
+            telemetry.addData(selectedRow == 5 ? "-> FLYWL SPD" : "   FLYWL SPD", "%.0f%%", globalShooterPower * 100);
+            telemetry.addData(selectedRow == 6 ? "-> FLYWL DIR" : "   FLYWL DIR", globalShooterReverse ? "REVERSE" : "FORWARD");
 
             telemetry.addLine("-----------------------------");
-            telemetry.addLine("-----------------------------");
-
             telemetry.addLine("PROGRAM:");
             for (int i = 0; i < program.size(); i++) {
                 telemetry.addData("" + (i + 1), program.get(i).toString());
@@ -190,6 +190,12 @@ public class auto extends LinearOpMode {
         }
 
         if (opModeIsActive()) {
+
+            if (globalShooterReverse) {
+                shooter.setDirection(DcMotorSimple.Direction.REVERSE);
+            } else {
+                shooter.setDirection(DcMotorSimple.Direction.FORWARD);
+            }
             shooter.setPower(globalShooterPower);
 
             for (int i = 0; i < program.size(); i++) {
