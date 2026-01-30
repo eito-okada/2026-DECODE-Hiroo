@@ -33,7 +33,10 @@ public class jan25 extends OpMode {
         fr = hardwareMap.get(DcMotor.class, "motor2");
         br = hardwareMap.get(DcMotor.class, "motor3");
 
+        fl.setDirection(DcMotorSimple.Direction.REVERSE); 
         bl.setDirection(DcMotorSimple.Direction.REVERSE);
+        fr.setDirection(DcMotorSimple.Direction.FORWARD);
+        br.setDirection(DcMotorSimple.Direction.FORWARD);
 
         fl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         fr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -119,12 +122,4 @@ public class jan25 extends OpMode {
             }
         }
 // ---- Shooter toggle ----
-        boolean shooterBtn = gamepad1.right_bumper; // R1
-        if (shooterBtn && !lastShooterBtn)
-            shooterOn = !shooterOn;
-        lastShooterBtn = shooterBtn;
-
-        shooter.setPower(shooterOn ? 1.0 : 0.0);
-
-    }
-}
+        boolean shooterBtn = gamepad1.rig
