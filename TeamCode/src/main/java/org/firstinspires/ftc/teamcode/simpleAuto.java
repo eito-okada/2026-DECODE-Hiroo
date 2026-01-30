@@ -33,7 +33,7 @@ public class simpleAuto extends LinearOpMode {
         shooter.setDirection(DcMotorSimple.Direction.REVERSE);
         transfer.setDirection(DcMotorSimple.Direction.REVERSE);
         shooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(200, 0, 0, 20);
+        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(300, 0, 0, 30);
         shooter.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
 
         waitForStart(); // The code stops here until you hit "PLAY"
@@ -46,7 +46,7 @@ public class simpleAuto extends LinearOpMode {
         fr.setPower(power);
         bl.setPower(power);
         br.setPower(power);
-        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(200, 0, 0, 20);
+        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(300, 0, 0, 30);
         shooter.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, pidfCoefficients);
         sleep(time);
         shooter.setVelocity(1520);
