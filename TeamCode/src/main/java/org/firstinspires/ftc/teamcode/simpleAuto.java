@@ -21,7 +21,7 @@ public class simpleAuto extends LinearOpMode {
         bl = hardwareMap.get(DcMotor.class, "motor1");
         fr = hardwareMap.get(DcMotor.class, "motor2");
         br = hardwareMap.get(DcMotor.class, "motor3");
-        fl.setDirection(DcMotorSimple.Direction.REVERSE); //ワンチャンなおす
+        fl.setDirection(DcMotorSimple.Direction.FORWARD); //ワンチャンなおす
         bl.setDirection(DcMotorSimple.Direction.REVERSE);
         fl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         fr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
