@@ -1,33 +1,55 @@
 package org.firstinspires.ftc.teamcode;
 
+import androidx.annotation.NonNull;
+
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
-@Autonomous(name = "Configurable Auto (Gamepad Tune)", group = "Backup")
+import java.util.ArrayList;
+import java.util.List;
+
+@Autonomous(name = "Totally auto", group = "Main")
 public class auto extends LinearOpMode {
 
-    private double driveSpeed = 0.50; // 50%
-    private double driveTime  = 2.0;  // 2.0 Seconds
+    private DcMotor fl, fr, bl, br;
+    private DcMotor shooter, transfer;
 
-    boolean lastUp = false, lastDown = false;
-    boolean lastRight = false, lastLeft = false;
+    private enum ActionType { FORWARD, BACKWARD, LEFT, RIGHT, SHOOT }
+
+    private static class AutoStep {
+        ActionType type;
+        double power;
+        double seconds;
+
+        public AutoStep(ActionType t, double p, double s) {
+            this.type = t;
+            this.power = p;
+            this.seconds = s;
+        }
+
+        @NonNull
+        @Override
+        public String toString() {
+            if (type == ActionType.SHOOT) return "SHOOT";
+            return String.format("%s (%.0f%%) for %.1fs", type, power * 100, seconds);
+        }
+    }
+
+    private List<AutoStep> program = new ArrayList<>();
 
     @Override
     public void runOpMode() {
 
-        DcMotor fl = hardwareMap.get(DcMotor.class, "motor2");
-        DcMotor fr = hardwareMap.get(DcMotor.class, "motor0");
-        DcMotor bl = hardwareMap.get(DcMotor.class, "motor3");
-        DcMotor br = hardwareMap.get(DcMotor.class, "motor1");
-        DcMotor shooter = hardwareMap.get(DcMotor.class, "motor7");
-        DcMotor transfer = hardwareMap.get(DcMotor.class, "motor6");
+        fl = hardwareMap.get(DcMotor.class, "motor0");
+        bl = hardwareMap.get(DcMotor.class, "motor1");
+        fr = hardwareMap.get(DcMotor.class, "motor2");
+        br = hardwareMap.get(DcMotor.class, "motor3");
+        shooter = hardwareMap.get(DcMotor.class, "motor7");
+        transfer = hardwareMap.get(DcMotor.class, "motor6");
 
-        fl.setDirection(DcMotorSimple.Direction.REVERSE);
         bl.setDirection(DcMotorSimple.Direction.REVERSE);
-        fr.setDirection(DcMotorSimple.Direction.FORWARD);
-        br.setDirection(DcMotorSimple.Direction.FORWARD);
         shooter.setDirection(DcMotorSimple.Direction.FORWARD);
         transfer.setDirection(DcMotorSimple.Direction.FORWARD);
 
@@ -35,80 +57,130 @@ public class auto extends LinearOpMode {
         fr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         bl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         br.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        shooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
+        int selectedRow = 0;
+        ActionType curType = ActionType.FORWARD;
+        double curPower = 0.5;
+        double curTime = 1.0;
 
-        telemetry.addLine("--- CONFIG MODE ---");
-        telemetry.addLine("Use D-Pad to adjust settings.");
-        telemetry.update();
+        boolean lastUp = false, lastDown = false, lastLeft = false, lastRight = false;
+        boolean lastA = false, lastB = false;
+
+        ActionType[] types = ActionType.values();
 
         while (!isStarted() && !isStopRequested()) {
 
-            // --- SPEED CONTROL (Up/Down) ---
-            if (gamepad1.dpad_up && !lastUp) {
-                driveSpeed += 0.01; // +1%
-            }
-            if (gamepad1.dpad_down && !lastDown) {
-                driveSpeed -= 0.01; // -1%
-            }
+            if (gamepad1.dpad_up && !lastUp) selectedRow--;
+            if (gamepad1.dpad_down && !lastDown) selectedRow++;
+            if (selectedRow < 0) selectedRow = 2;
+            if (selectedRow > 2) selectedRow = 0;
 
             if (gamepad1.dpad_right && !lastRight) {
-                driveTime += 0.1; // +0.1 sec
-            }
-            if (gamepad1.dpad_left && !lastLeft) {
-                driveTime -= 0.1; // -0.1 sec
+                if (selectedRow == 0) {
+                    int next = (curType.ordinal() + 1) % types.length;
+                    curType = types[next];
+                } else if (selectedRow == 1) {
+                    curPower += 0.1;
+                    if (curPower > 1.0) curPower = 1.0;
+                } else {
+                    curTime += 0.1;
+                }
             }
 
-            if (driveSpeed < 0) driveSpeed = 0;
-            if (driveSpeed > 1) driveSpeed = 1;
-            if (driveTime < 0)  driveTime = 0;
+            if (gamepad1.dpad_left && !lastLeft) {
+                if (selectedRow == 0) {
+                    int prev = (curType.ordinal() - 1);
+                    if (prev < 0) prev = types.length - 1;
+                    curType = types[prev];
+                } else if (selectedRow == 1) {
+                    curPower -= 0.1;
+                    if (curPower < 0.1) curPower = 0.1;
+                } else {
+                    curTime -= 0.1;
+                    if (curTime < 0.1) curTime = 0.1;
+                }
+            }
+
+            if (gamepad1.a && !lastA) {
+                program.add(new AutoStep(curType, curPower, curTime));
+            }
+
+            if (gamepad1.b && !lastB) {
+                if (!program.isEmpty()) {
+                    program.remove(program.size() - 1);
+                }
+            }
 
             lastUp = gamepad1.dpad_up;
             lastDown = gamepad1.dpad_down;
-            lastRight = gamepad1.dpad_right;
             lastLeft = gamepad1.dpad_left;
+            lastRight = gamepad1.dpad_right;
+            lastA = gamepad1.a;
+            lastB = gamepad1.b;
 
-            telemetry.addLine(">> READY TO START <<");
-            telemetry.addLine("--------------------");
-            telemetry.addData("Speed (Up/Dn)", "%.0f %%", driveSpeed * 100);
-            telemetry.addData("Time  (Rt/Lt)", "%.1f sec", driveTime);
-            telemetry.addLine("--------------------");
+            telemetry.addLine("=== CREATOR MODE ===");
+            telemetry.addLine("DPAD: Move/Change | A: Add | B: Delete");
+            telemetry.addLine();
+
+            telemetry.addData(selectedRow == 0 ? "-> ACTION" : "   ACTION", curType);
+            telemetry.addData(selectedRow == 1 ? "-> POWER " : "   POWER ", "%.0f%%", curPower * 100);
+            telemetry.addData(selectedRow == 2 ? "-> TIME  " : "   TIME  ", "%.1fs", curTime);
+
+            telemetry.addLine();
+            telemetry.addLine("--- CURRENT PROGRAM ---");
+            for (int i = 0; i < program.size(); i++) {
+                telemetry.addData(String.valueOf(i + 1), program.get(i).toString());
+            }
             telemetry.update();
         }
 
-
-
         if (opModeIsActive()) {
+            for (AutoStep step : program) {
+                if (!opModeIsActive()) break;
+                telemetry.addData("Executing", step.toString());
+                telemetry.update();
+                execute(step);
+                sleep(200);
+            }
+        }
+    }
 
-            telemetry.addData("Action", "Driving for %.1fs at %.0f%%", driveTime, driveSpeed*100);
-            telemetry.update();
+    private void execute(AutoStep step) {
+        if (step.type == ActionType.SHOOT) {
+            shooter.setPower(1.0);
+            sleep(1500);
+            transfer.setPower(1.0);
+            sleep(1500);
+            shooter.setPower(0);
+            transfer.setPower(0);
+        } else {
+            double y = 0, x = 0, rx = 0;
+            double p = step.power;
 
-            fl.setPower(driveSpeed);
-            fr.setPower(driveSpeed);
-            bl.setPower(driveSpeed);
-            br.setPower(driveSpeed);
+            switch (step.type) {
+                case FORWARD: y = p; break;
+                case BACKWARD: y = -p; break;
+                case LEFT: x = -p; break;
+                case RIGHT: x = p; break;
+            }
 
-            sleep((long)(driveTime * 1000));
+            double flP = y + x + rx;
+            double frP = y - x - rx;
+            double blP = y - x + rx;
+            double brP = y + x - rx;
 
-            // Stop
+            fl.setPower(flP);
+            fr.setPower(frP);
+            bl.setPower(blP);
+            br.setPower(brP);
+
+            sleep((long) (step.seconds * 1000));
+
             fl.setPower(0);
             fr.setPower(0);
             bl.setPower(0);
             br.setPower(0);
-
-            sleep(500);
-
-            telemetry.addData("Action", "Shooting...");
-            telemetry.update();
-
-            shooter.setPower(1.0);
-            sleep(2000); // Spin up
-
-            transfer.setPower(1.0);
-            sleep(2000); // Feed
-
-            // Stop All
-            shooter.setPower(0);
-            transfer.setPower(0);
         }
     }
 }
