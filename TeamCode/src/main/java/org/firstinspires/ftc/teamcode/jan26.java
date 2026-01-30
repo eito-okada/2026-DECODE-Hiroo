@@ -3,7 +3,9 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 @TeleOp(name = "toggle shooter", group = "Main")
 public class jan26 extends OpMode {
@@ -14,7 +16,7 @@ public class jan26 extends OpMode {
     // Mechanisms
     DcMotor intakeLeft, intakeRight;
     DcMotor transfer;
-    DcMotor shooter;
+    DcMotorEx shooter;
 
     // Shooter toggle
     boolean shooterOn = false;
@@ -48,13 +50,17 @@ public class jan26 extends OpMode {
         intakeLeft = hardwareMap.get(DcMotor.class, "motor4");
         intakeRight = hardwareMap.get(DcMotor.class, "motor5");
         transfer = hardwareMap.get(DcMotor.class, "motor6");
-        shooter = hardwareMap.get(DcMotor.class, "motor7");
+        shooter = hardwareMap.get(DcMotorEx.class, "motor7");
 
         // Directions (CHANGE if your robot runs backwards)
         intakeRight.setDirection(DcMotorSimple.Direction.REVERSE);
+        transfer.setDirection(DcMotorSimple.Direction.REVERSE);
 
         // Shooter usually coasts
         shooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        shooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(20, 0, 0, 3);
+        shooter.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
     }
 
     @Override
@@ -131,6 +137,13 @@ public class jan26 extends OpMode {
             shooterOn = !shooterOn;
         lastShooterBtn = shooterBtn;
 
-        shooter.setPower(shooterOn ? 1.0 : 0.0);
+        if (shooterOn) {
+            PIDFCoefficients pidfCoefficients = new PIDFCoefficients(20, 0, 0, 3);
+            shooter.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, pidfCoefficients);
+            shooter.setVelocity(1520);
+        } else {
+            shooter.setPower(0);
+        }
+
     }
 }
