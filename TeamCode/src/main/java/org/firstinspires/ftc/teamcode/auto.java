@@ -221,13 +221,9 @@ public class auto extends LinearOpMode {
         }
 
         if (opModeIsActive()) {
+            shooter.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, pidfCoefficients);
+            shooter.setVelocity(1520);
 
-            if (globalShooterReverse) {
-                shooter.setDirection(DcMotorSimple.Direction.REVERSE);
-            } else {
-                shooter.setDirection(DcMotorSimple.Direction.FORWARD);
-            }
-            shooter.setPower(globalShooterPower);
 
             for (int i = 0; i < program.size(); i++) {
                 if (!opModeIsActive()) break;
