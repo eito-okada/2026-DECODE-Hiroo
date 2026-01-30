@@ -15,7 +15,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import java.util.ArrayList;
 import java.util.List;
 
-@Autonomous(name = "誰が何を言おうと自動です V8", group = "Main")
+@Autonomous(name = "誰が何を言おうと自動です V9", group = "Main")
 public class auto extends LinearOpMode {
 
     private DcMotor fl, fr, bl, br;
@@ -90,7 +90,7 @@ public class auto extends LinearOpMode {
         double globalShooterPower = 0.6;
 
         boolean lastUp = false, lastDown = false, lastLeft = false, lastRight = false;
-        boolean lastA = false, lastB = false;
+        boolean lastA = false, lastB = false, lastX = false;
 
         ActionType[] types = ActionType.values();
 
@@ -143,15 +143,25 @@ public class auto extends LinearOpMode {
             if (gamepad1.a && !lastA) program.add(new AutoStep(curType, curPower, curValue));
             if (gamepad1.b && !lastB && !program.isEmpty()) program.remove(program.size() - 1);
 
+            if (gamepad1.x && !lastX) {
+                if (fl.getDirection() == DcMotorSimple.Direction.FORWARD) {
+                    fl.setDirection(DcMotorSimple.Direction.REVERSE);
+                } else {
+                    fl.setDirection(DcMotorSimple.Direction.FORWARD);
+                }
+            }
+
             lastUp = gamepad1.dpad_up;
             lastDown = gamepad1.dpad_down;
             lastLeft = gamepad1.dpad_left;
             lastRight = gamepad1.dpad_right;
             lastA = gamepad1.a;
             lastB = gamepad1.b;
+            lastX = gamepad1.x;
 
-            telemetry.addLine("=== CREATOR V8 ===");
+            telemetry.addLine("=== CREATOR V9 ===");
             telemetry.addLine("DPAD: Edit | A: Add | B: Delete");
+            telemetry.addLine("X: Toggle FL Direction");
             telemetry.addLine();
 
             telemetry.addData(selectedRow == 0 ? "-> ACTION" : "   ACTION", curType);
@@ -165,7 +175,10 @@ public class auto extends LinearOpMode {
 
             telemetry.addLine();
             telemetry.addData(selectedRow == 3 ? "-> FLYWL " : "   FLYWL ", "%.0f%%", globalShooterPower * 100);
-            telemetry.addLine();
+
+            telemetry.addLine("-----------------------------");
+            telemetry.addData("FL Motor Dir", fl.getDirection());
+            telemetry.addLine("-----------------------------");
 
             telemetry.addLine("PROGRAM:");
             for (int i = 0; i < program.size(); i++) {
