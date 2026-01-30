@@ -16,7 +16,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import java.util.ArrayList;
 import java.util.List;
 
-@Autonomous(name = "究極の V17", group = "Main")
+@Autonomous(name = "本当に究極の V18", group = "Main")
 public class auto extends LinearOpMode {
 
     private DcMotor fl, fr, bl, br;
@@ -85,7 +85,7 @@ public class auto extends LinearOpMode {
         fr.setDirection(DcMotorSimple.Direction.FORWARD);
         br.setDirection(DcMotorSimple.Direction.FORWARD);
 
-        shooter.setDirection(DcMotorSimple.Direction.REVERSE);
+        shooter.setDirection(DcMotorSimple.Direction.FORWARD);
         gecko.setDirection(DcMotorSimple.Direction.REVERSE);
         intake.setDirection(DcMotorSimple.Direction.FORWARD);
 
