@@ -43,7 +43,7 @@ public class auto extends LinearOpMode {
         }
     }
 
-    private List<AutoStep> program = new ArrayList<>();
+    private final List<AutoStep> program = new ArrayList<>();
 
     @Override
     public void runOpMode() {
