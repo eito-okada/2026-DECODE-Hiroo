@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
@@ -20,6 +21,7 @@ public class auto extends LinearOpMode {
 
     private DcMotor fl, fr, bl, br;
     private DcMotor gecko, intake;
+    public DcMotorEx shooter;
     private IMU imu;
 
     private enum ActionType {
@@ -66,7 +68,11 @@ public class auto extends LinearOpMode {
 
         intake = hardwareMap.get(DcMotor.class, "motor4");
         gecko = hardwareMap.get(DcMotor.class, "motor6");
-        DcMotorEx shooter = hardwareMap.get(DcMotorEx.class, "motor7");
+        shooter = hardwareMap.get(DcMotorEx.class, "motor7");
+        shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        shooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(300, 0, 0, 30);
+        shooter.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
 
         imu = hardwareMap.get(IMU.class, "imu");
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(

@@ -66,6 +66,7 @@ public class jan26 extends OpMode {
         shooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         PIDFCoefficients pidfCoefficients = new PIDFCoefficients(200, 0, 0, 20);
         shooter.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
+
     }
 
     @Override
