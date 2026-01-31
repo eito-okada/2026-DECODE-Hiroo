@@ -12,7 +12,7 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import java.util.ArrayList;
 import java.util.List;
 
-@Autonomous(name = "オドメトリーの存在意義はもうないよ！ V22 ", group = "Main")
+@Autonomous(name = "3個は打てるやつ V22 ", group = "Main")
 public class auto extends LinearOpMode {
 
     private DcMotor fl, fr, bl, br;
