@@ -38,8 +38,8 @@ public class jan26 extends OpMode {
         fr = hardwareMap.get(DcMotor.class, "motor2");
         br = hardwareMap.get(DcMotor.class, "motor3");
 
-        fl.setDirection(DcMotorSimple.Direction.REVERSE);
-        //fl.setDirection(DcMotorSimple.Direction.FORWARD);
+        //fl.setDirection(DcMotorSimple.Direction.REVERSE);
+        fl.setDirection(DcMotorSimple.Direction.FORWARD);
         bl.setDirection(DcMotorSimple.Direction.REVERSE);
         fr.setDirection(DcMotorSimple.Direction.FORWARD);
         br.setDirection(DcMotorSimple.Direction.FORWARD);
