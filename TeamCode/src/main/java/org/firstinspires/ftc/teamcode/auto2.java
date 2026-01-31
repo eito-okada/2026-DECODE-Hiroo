@@ -12,8 +12,8 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import java.util.ArrayList;
 import java.util.List;
 
-@Autonomous(name = "3個は打てるやつ V22 ", group = "Main")
-public class auto extends LinearOpMode {
+@Autonomous(name = "3個以上打ちたいよ V1 ", group = "Main")
+public class auto2 extends LinearOpMode {
 
     private DcMotor fl, fr, bl, br;
     private DcMotor gecko, intake;
@@ -167,7 +167,7 @@ public class auto extends LinearOpMode {
 
             if (gamepad1.a && !lastA) {
                 if (selectedRow == 7) {
-                    program.add(new AutoStep(ActionType.BACKWARD, 0.3, 3.2, false));
+                    program.add(new AutoStep(ActionType.BACKWARD, 0.3, 3.6, false));
                     program.add(new AutoStep(ActionType.GECKO, 1.0, 2.0, false));
                     program.add(new AutoStep(ActionType.INTAKE, 1.0, 5.0, true));
                     program.add(new AutoStep(ActionType.GECKO, 1.0, 5.0, false));
