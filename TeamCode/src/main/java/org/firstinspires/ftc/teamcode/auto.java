@@ -16,7 +16,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import java.util.ArrayList;
 import java.util.List;
 
-@Autonomous(name = "強くしてニューボット V19 ", group = "Main")
+@Autonomous(name = "海賊王 V20 ", group = "Main")
 public class auto extends LinearOpMode {
 
     private DcMotor fl, fr, bl, br;
@@ -24,9 +24,12 @@ public class auto extends LinearOpMode {
     public DcMotorEx shooter;
     private IMU imu;
 
-    final double P_GAIN = 0.02;
-    final double MIN_POWER = 0.2;
-    final double HEADING_THRESHOLD = 1.0;
+    final double P_GAIN = 0.03;
+    final double MIN_POWER = 0.13;
+    final double HEADING_THRESHOLD = 0.5;
+
+    private final double[] validAngles = {45.0, 90.0, 135.0, 180.0};
+    private int angleIdx = 1;
 
     private enum ActionType {
         FORWARD, BACKWARD, LEFT, RIGHT, TURN_LEFT, TURN_RIGHT,
@@ -128,7 +131,7 @@ public class auto extends LinearOpMode {
                 if (selectedRow == 0) {
                     curType = types[(curType.ordinal() + 1) % types.length];
                     if (curType == ActionType.TURN_LEFT || curType == ActionType.TURN_RIGHT) {
-                        if (curValue < 10) curValue = 90;
+                        curValue = validAngles[angleIdx];
                     } else {
                         if (curValue > 10) curValue = 1.0;
                     }
@@ -136,7 +139,11 @@ public class auto extends LinearOpMode {
                 else if (selectedRow == 1) curPower = Math.min(1.0, curPower + 0.1);
                 else if (selectedRow == 2) curReverse = !curReverse;
                 else if (selectedRow == 3) {
-                    if (curType == ActionType.TURN_LEFT || curType == ActionType.TURN_RIGHT) curValue += 5;
+                    if (curType == ActionType.TURN_LEFT || curType == ActionType.TURN_RIGHT) {
+                        angleIdx++;
+                        if (angleIdx >= validAngles.length) angleIdx = 0;
+                        curValue = validAngles[angleIdx];
+                    }
                     else curValue += 0.1;
                 }
                 else if (selectedRow == 4) curJoin = !curJoin;
@@ -149,11 +156,21 @@ public class auto extends LinearOpMode {
                     int prev = curType.ordinal() - 1;
                     if (prev < 0) prev = types.length - 1;
                     curType = types[prev];
+
+                    if (curType == ActionType.TURN_LEFT || curType == ActionType.TURN_RIGHT) {
+                        curValue = validAngles[angleIdx];
+                    } else {
+                        if (curValue > 10) curValue = 1.0;
+                    }
                 }
                 else if (selectedRow == 1) curPower = Math.max(0.1, curPower - 0.1);
                 else if (selectedRow == 2) curReverse = !curReverse;
                 else if (selectedRow == 3) {
-                    if (curType == ActionType.TURN_LEFT || curType == ActionType.TURN_RIGHT) curValue = Math.max(5, curValue - 5);
+                    if (curType == ActionType.TURN_LEFT || curType == ActionType.TURN_RIGHT) {
+                        angleIdx--;
+                        if (angleIdx < 0) angleIdx = validAngles.length - 1;
+                        curValue = validAngles[angleIdx];
+                    }
                     else curValue = Math.max(0.1, curValue - 0.1);
                 }
                 else if (selectedRow == 4) curJoin = !curJoin;
@@ -181,7 +198,7 @@ public class auto extends LinearOpMode {
             lastLeft = gamepad1.dpad_left; lastRight = gamepad1.dpad_right;
             lastA = gamepad1.a; lastB = gamepad1.b;
 
-            telemetry.addLine("=== CREATOR V19 (ENHANCED TURN) ===");
+            telemetry.addLine("=== CREATOR V20 (PRECISION) ===");
             telemetry.addLine("DPAD: Edit | A: Add | B: Delete");
             telemetry.addLine();
 
@@ -281,7 +298,7 @@ public class auto extends LinearOpMode {
         imu.resetYaw();
 
         long startTime = System.currentTimeMillis();
-        long timeoutMs = 4000;
+        long timeoutMs = 5000;
 
         while (opModeIsActive() && (System.currentTimeMillis() - startTime < timeoutMs)) {
             double currentAngle = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
@@ -307,7 +324,7 @@ public class auto extends LinearOpMode {
             telemetry.update();
         }
         stopAllMotors();
-        sleep(100);
+        sleep(150);
     }
 
     private void driveMecanum(double y, double x, double rx) {
