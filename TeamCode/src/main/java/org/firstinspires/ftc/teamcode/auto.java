@@ -167,10 +167,8 @@ public class auto extends LinearOpMode {
 
             if (gamepad1.a && !lastA) {
                 if (selectedRow == 7) {
-                    program.add(new AutoStep(ActionType.BACKWARD, 0.3, 3.5, false));
+                    program.add(new AutoStep(ActionType.BACKWARD, 0.3, 3.6, false));
                     program.add(new AutoStep(ActionType.GECKO, 1.0, 2.0, false));
-                    program.add(new AutoStep(ActionType.INTAKE, 1.0, 1, false));
-                    program.add(new AutoStep(ActionType.INTAKE, -1.0, 0.3, false));
                     program.add(new AutoStep(ActionType.INTAKE, 1.0, 5.0, true));
                     program.add(new AutoStep(ActionType.GECKO, 1.0, 5.0, false));
                 } else {
