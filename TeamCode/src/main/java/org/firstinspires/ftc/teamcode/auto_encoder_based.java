@@ -16,15 +16,15 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import java.util.ArrayList;
 import java.util.List;
 
-@Autonomous(name = "海賊王・亜種 V20-2 ", group = "Main")
-public class auto_encoder_based extends LinearOpMode {
+@Autonomous(name = "本当に究極の V21 (CM Version)", group = "Main")
+public class auto extends LinearOpMode {
 
     private DcMotorEx fl, fr, bl, br;
     private DcMotor gecko, intake;
     public DcMotorEx shooter;
     private IMU imu;
 
-    final double TICKS_PER_INCH = 45.0;
+    final double TICKS_PER_CM = 18.0;
     final double STRAFE_MULTI = 1.1;
 
     final double P_GAIN = 0.03;
@@ -62,7 +62,7 @@ public class auto_encoder_based extends LinearOpMode {
             }
             else if (type == ActionType.FORWARD || type == ActionType.BACKWARD ||
                     type == ActionType.LEFT || type == ActionType.RIGHT) {
-                return String.format("%s (%.0f%%) %.1f in%s", type, Math.abs(power * 100), value, joinStr);
+                return String.format("%s (%.0f%%) %.1f cm%s", type, Math.abs(power * 100), value, joinStr);
             }
             else {
                 return String.format("%s (%.0f%%) %.1fs%s", type, Math.abs(power * 100), value, joinStr);
@@ -114,7 +114,7 @@ public class auto_encoder_based extends LinearOpMode {
         int selectedRow = 0;
         ActionType curType = ActionType.FORWARD;
         double curPower = 0.5;
-        double curValue = 12.0;
+        double curValue = 30.0;
         boolean curJoin = false;
         boolean curReverse = false;
 
@@ -137,7 +137,7 @@ public class auto_encoder_based extends LinearOpMode {
                 if (selectedRow == 0) {
                     curType = types[(curType.ordinal() + 1) % types.length];
                     if (isTurn(curType)) curValue = validAngles[angleIdx];
-                    else if (isDrive(curType)) curValue = 12.0;
+                    else if (isDrive(curType)) curValue = 30.0;
                     else curValue = 1.0;
                 }
                 else if (selectedRow == 1) curPower = Math.min(1.0, curPower + 0.1);
@@ -164,7 +164,7 @@ public class auto_encoder_based extends LinearOpMode {
                     curType = types[prev];
 
                     if (isTurn(curType)) curValue = validAngles[angleIdx];
-                    else if (isDrive(curType)) curValue = 12.0;
+                    else if (isDrive(curType)) curValue = 30.0;
                     else curValue = 1.0;
                 }
                 else if (selectedRow == 1) curPower = Math.max(0.1, curPower - 0.1);
@@ -187,7 +187,7 @@ public class auto_encoder_based extends LinearOpMode {
 
             if (gamepad1.a && !lastA) {
                 if (selectedRow == 7) {
-                    program.add(new AutoStep(ActionType.BACKWARD, 0.3, 10.0, false));
+                    program.add(new AutoStep(ActionType.BACKWARD, 0.3, 20.0, false));
                     program.add(new AutoStep(ActionType.GECKO, 1.0, 2.0, false));
                     program.add(new AutoStep(ActionType.INTAKE, 1.0, 1.0, false));
                     program.add(new AutoStep(ActionType.INTAKE, -1.0, 0.3, false));
@@ -205,7 +205,7 @@ public class auto_encoder_based extends LinearOpMode {
             lastLeft = gamepad1.dpad_left; lastRight = gamepad1.dpad_right;
             lastA = gamepad1.a; lastB = gamepad1.b;
 
-            telemetry.addLine("=== CREATOR V21 (ENCODER) ===");
+            telemetry.addLine("=== CREATOR V21 (CM VERSION) ===");
             telemetry.addLine("DPAD: Edit | A: Add | B: Delete");
             telemetry.addLine();
 
@@ -216,7 +216,7 @@ public class auto_encoder_based extends LinearOpMode {
             if (isTurn(curType)) {
                 telemetry.addData(selectedRow == 3 ? "-> ANGLE " : "   ANGLE ", "%.0f deg", curValue);
             } else if (isDrive(curType)) {
-                telemetry.addData(selectedRow == 3 ? "-> DIST  " : "   DIST  ", "%.1f in", curValue);
+                telemetry.addData(selectedRow == 3 ? "-> DIST  " : "   DIST  ", "%.1f cm", curValue);
             } else {
                 telemetry.addData(selectedRow == 3 ? "-> TIME  " : "   TIME  ", "%.1fs", curValue);
             }
@@ -271,10 +271,10 @@ public class auto_encoder_based extends LinearOpMode {
         }
     }
 
-    private void driveEncoder(ActionType type, double inches, double power) {
+    private void driveEncoder(ActionType type, double cm, double power) {
         resetDriveEncoders();
 
-        double targetTicks = inches * TICKS_PER_INCH;
+        double targetTicks = cm * TICKS_PER_CM;
         if (type == ActionType.LEFT || type == ActionType.RIGHT) {
             targetTicks *= STRAFE_MULTI;
         }
