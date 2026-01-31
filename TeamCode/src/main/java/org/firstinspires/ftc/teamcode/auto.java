@@ -2,31 +2,24 @@ package org.firstinspires.ftc.teamcode;
 
 import androidx.annotation.NonNull;
 
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
-
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Autonomous(name = "海賊王 V20 ", group = "Main")
+@Autonomous(name = "オドメトリーの存在意義はもうないよ！ V22 ", group = "Main")
 public class auto extends LinearOpMode {
 
     private DcMotor fl, fr, bl, br;
     private DcMotor gecko, intake;
     public DcMotorEx shooter;
-    private IMU imu;
 
-    final double P_GAIN = 0.03;
-    final double MIN_POWER = 0.13;
-    final double HEADING_THRESHOLD = 0.5;
+    final double MS_PER_DEGREE = 5.5;
 
     private final double[] validAngles = {45.0, 90.0, 135.0, 180.0};
     private int angleIdx = 1;
@@ -81,12 +74,6 @@ public class auto extends LinearOpMode {
         shooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         PIDFCoefficients pidfCoefficients = new PIDFCoefficients(300, 0, 0, 30);
         shooter.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
-
-        imu = hardwareMap.get(IMU.class, "imu");
-        IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
-                RevHubOrientationOnRobot.LogoFacingDirection.UP,
-                RevHubOrientationOnRobot.UsbFacingDirection.FORWARD));
-        imu.initialize(parameters);
 
         fl.setDirection(DcMotorSimple.Direction.FORWARD);
         bl.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -198,7 +185,7 @@ public class auto extends LinearOpMode {
             lastLeft = gamepad1.dpad_left; lastRight = gamepad1.dpad_right;
             lastA = gamepad1.a; lastB = gamepad1.b;
 
-            telemetry.addLine("=== CREATOR V20 (PRECISION) ===");
+            telemetry.addLine("=== CREATOR V22 (TIME TURN) ===");
             telemetry.addLine("DPAD: Edit | A: Add | B: Delete");
             telemetry.addLine();
 
@@ -247,15 +234,16 @@ public class auto extends LinearOpMode {
 
                 startAction(step);
 
+                long sleepTime;
                 if (step.type == ActionType.TURN_LEFT || step.type == ActionType.TURN_RIGHT) {
-                    double target = (step.type == ActionType.TURN_LEFT) ? step.value : -step.value;
-                    waitForGyro(target, step.power);
+                    sleepTime = (long) (step.value * MS_PER_DEGREE);
                 } else {
-                    if (step.joinNext) {
-                    } else {
-                        sleep((long) (step.value * 1000));
-                        stopAllMotors();
-                    }
+                    sleepTime = (long) (step.value * 1000);
+                }
+
+                if (!step.joinNext) {
+                    sleep(sleepTime);
+                    stopAllMotors();
                 }
             }
             shooter.setPower(0);
@@ -272,6 +260,13 @@ public class auto extends LinearOpMode {
             case LEFT:      driveMecanum(0, -p, 0); break;
             case RIGHT:     driveMecanum(0, p, 0); break;
 
+            case TURN_LEFT:
+                driveMecanum(0, 0, p);
+                break;
+            case TURN_RIGHT:
+                driveMecanum(0, 0, -p);
+                break;
+
             case INTAKE:
                 intake.setPower(p);
                 break;
@@ -282,49 +277,12 @@ public class auto extends LinearOpMode {
                 gecko.setPower(p);
                 intake.setPower(p);
                 break;
-
-            case TURN_LEFT:
-            case TURN_RIGHT:
-                break;
         }
     }
 
     private void stopAllMotors() {
         fl.setPower(0); fr.setPower(0); bl.setPower(0); br.setPower(0);
         gecko.setPower(0); intake.setPower(0);
-    }
-
-    private void waitForGyro(double targetAngleDeg, double maxPower) {
-        imu.resetYaw();
-
-        long startTime = System.currentTimeMillis();
-        long timeoutMs = 5000;
-
-        while (opModeIsActive() && (System.currentTimeMillis() - startTime < timeoutMs)) {
-            double currentAngle = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
-            double error = targetAngleDeg - currentAngle;
-
-            if (Math.abs(error) <= HEADING_THRESHOLD) {
-                break;
-            }
-
-            double turnSpeed = error * P_GAIN;
-
-            turnSpeed = Math.max(-maxPower, Math.min(maxPower, turnSpeed));
-
-            if (Math.abs(turnSpeed) < MIN_POWER) {
-                turnSpeed = Math.signum(turnSpeed) * MIN_POWER;
-            }
-
-            driveMecanum(0, 0, -turnSpeed);
-
-            telemetry.addData("Target", "%.1f", targetAngleDeg);
-            telemetry.addData("Current", "%.1f", currentAngle);
-            telemetry.addData("Error", "%.1f", error);
-            telemetry.update();
-        }
-        stopAllMotors();
-        sleep(150);
     }
 
     private void driveMecanum(double y, double x, double rx) {

@@ -16,8 +16,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import java.util.ArrayList;
 import java.util.List;
 
-@Autonomous(name = "本当に究極の V21 (CM Version)", group = "Main")
-public class auto extends LinearOpMode {
+@Autonomous(name = "ツン良い V21 ", group = "Main")
+public class auto_encoder_based extends LinearOpMode {
 
     private DcMotorEx fl, fr, bl, br;
     private DcMotor gecko, intake;
