@@ -167,10 +167,21 @@ public class auto2 extends LinearOpMode {
 
             if (gamepad1.a && !lastA) {
                 if (selectedRow == 7) {
-                    program.add(new AutoStep(ActionType.BACKWARD, 0.3, 3.6, false));
+                    program.add(new AutoStep(ActionType.BACKWARD, 0.3, 3.1, false));
                     program.add(new AutoStep(ActionType.GECKO, 1.0, 2.0, false));
+                    program.add(new AutoStep(ActionType.INTAKE, 1.0, 2.0, true));
+                    program.add(new AutoStep(ActionType.GECKO, 1.0, 2.0, false));
+                    program.add(new AutoStep(ActionType.TURN_RIGHT, 0.5, 50, false));
+                    program.add(new AutoStep(ActionType.LEFT, 0.2, 0.3, false));
+                    program.add(new AutoStep(ActionType.INTAKE, 1.0, 1.0, true));
+                    program.add(new AutoStep(ActionType.FORWARD, 0.7, 1.2, false));
+                    program.add(new AutoStep(ActionType.INTAKE, 1, 0.3, false));
+                    program.add(new AutoStep(ActionType.BACKWARD, 0.7, 0.7, false));
+                    program.add(new AutoStep(ActionType.TURN_LEFT, 0.5, 45, false));
+                    program.add(new AutoStep(ActionType.BACKWARD, 0.5, 1.2, false));
                     program.add(new AutoStep(ActionType.INTAKE, 1.0, 5.0, true));
                     program.add(new AutoStep(ActionType.GECKO, 1.0, 5.0, false));
+
                 } else {
                     double finalPower = curReverse ? -curPower : curPower;
                     program.add(new AutoStep(curType, finalPower, curValue, curJoin));

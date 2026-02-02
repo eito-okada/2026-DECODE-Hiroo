@@ -22,6 +22,10 @@ public class jan26 extends OpMode {
     boolean shooterOn = false;
     boolean lastShooterBtn = false;
 
+    // CHANGED: Instead of boolean, we use an integer to count 0, 1, 2
+    int shooterMode = 0;
+    boolean lastModeBtn = false;
+
     boolean intakeOn = false;
     boolean lastIntakeBtn = false;
 
@@ -138,18 +142,60 @@ public class jan26 extends OpMode {
         }
 
 // ---- Shooter TOGGLE (R1) ----
-        boolean shooterBtn = gamepad1.right_bumper; // R1
-        if (shooterBtn && !lastShooterBtn)
+        boolean shooterBtn = gamepad1.right_bumper;
+        if (shooterBtn && !lastShooterBtn) {
             shooterOn = !shooterOn;
+        }
         lastShooterBtn = shooterBtn;
 
+        // 2. Cycle Modes (Dpad Down)
+        boolean modeBtn = gamepad1.dpad_down;
+
+        if (modeBtn && !lastModeBtn) {
+            shooterMode++; // Go up one level
+
+            // If we go past 2, reset to 0
+            if (shooterMode > 2) {
+                shooterMode = 0;
+            }
+        }
+        lastModeBtn = modeBtn;
+
+        // 3. Apply Power based on Mode
         if (shooterOn) {
-            PIDFCoefficients pidfCoefficients = new PIDFCoefficients(200, 0, 0, 20);
-            shooter.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, pidfCoefficients);
-            shooter.setVelocity(-1520);
+            if (shooterMode == 0) {
+                // --- SHORT RANGE ---
+                PIDFCoefficients pidf = new PIDFCoefficients(200, 0, 0, 20);
+                shooter.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, pidf);
+                shooter.setVelocity(-1520);
+
+            } else if (shooterMode == 1) {
+                // --- MEDIUM RANGE (The new one) ---
+                // I estimated P=350 and Vel=-1760. Adjust these numbers!
+                PIDFCoefficients pidf = new PIDFCoefficients(350, 0, 0, 35);
+                shooter.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, pidf);
+                shooter.setVelocity(-1760);
+
+            } else if (shooterMode == 2) {
+                // --- LONG RANGE ---
+                PIDFCoefficients pidf = new PIDFCoefficients(500, 0, 0, 50);
+                shooter.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, pidf);
+                shooter.setVelocity(-2000);
+            }
         } else {
             shooter.setPower(0);
         }
+
+        // TELEMETRY (Critical so you know what mode you are in!)
+        telemetry.addData("Shooter State", shooterOn ? "ON" : "OFF");
+
+        if (shooterMode == 0) telemetry.addData("Mode", "SHORT (-1520)");
+        else if (shooterMode == 1) telemetry.addData("Mode", "MEDIUM (-1760)");
+        else if (shooterMode == 2) telemetry.addData("Mode", "LONG (-2000)");
+
+        telemetry.update();
+
+
 
     }
 }
