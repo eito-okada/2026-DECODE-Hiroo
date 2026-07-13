@@ -23,7 +23,7 @@ public class AprilTagAuto extends LinearOpMode {
     private static final String WEBCAM_NAME = "Webcam 1";
 
     // Must match the pan motor's name in your Driver Station robot configuration.
-    private static final String PAN_MOTOR_NAME = "motor0";
+    private static final String PAN_MOTOR_NAME = "motor5";
 
     // Proportional gain: motor power per degree of bearing error.
     private static final double PAN_KP = 0.03;

@@ -19,7 +19,7 @@ public class MecanumTeleOp extends OpMode {
         fr = hardwareMap.get(DcMotor.class, "motor2");
         br = hardwareMap.get(DcMotor.class, "motor3");
 
-        fl.setDirection(DcMotorSimple.Direction.FORWARD);
+        fl.setDirection(DcMotorSimple.Direction.REVERSE);
         bl.setDirection(DcMotorSimple.Direction.REVERSE);
         fr.setDirection(DcMotorSimple.Direction.FORWARD);
         br.setDirection(DcMotorSimple.Direction.FORWARD);
